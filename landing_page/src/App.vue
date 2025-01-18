@@ -22,7 +22,7 @@
           <p>cryptocurrency.</p>
         </div>
         <div class="git-button">
-          <div class="button">
+          <div class="button"onclick="window.location.href='https://github.com/Ashley0324/ThorpAI'" >
             Github →
           </div>
         </div>
@@ -68,15 +68,15 @@
         </div>
       </div>
       <div class="card-1 mt32 CardSvg6 height354">
-        <div class="card-content ml48 mt15 pt-64 pl-15">
+        <div class="card-content ml48 mt15 pt-64 pl-15 pt-64-660">
           <p class="card-title ">Seamless collaboration with more strategy</p>
           <p class="card-des">"Seamless collaboration with social media platforms to amplify Thorp's reach and
             influence, enabling real-time engagement, sharing of insights, and fostering a global community of crypto
             enthusiasts and investors.</p>
         </div>
       </div>
-      <div class="card-1 mt32 height278 CardSvg7 ">
-        <div class="card-content join ml48 pt-74 pr-15">
+      <div class="card-1 mt32 height278 CardSvg7  ">
+        <div class="card-content  ml48 pt-74 pr-15  join">
           <p class="card-title">Join Us</p>
           <p class="card-des">Join the Thorp community and work alongside top economists, AI experts, and marketing
             professionals to help Thorp impact more people.</p>
