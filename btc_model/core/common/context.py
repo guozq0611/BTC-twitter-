@@ -12,7 +12,7 @@ import datetime
 
 class Context(object):
     """
-    策略上下文
+    策略、指标的上下文
     """
 
     def __repr__(self):
