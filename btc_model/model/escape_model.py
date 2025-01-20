@@ -14,50 +14,60 @@ import okx.MarketData as MarketData
 
 from btc_model.core.wrapper.okx_api_wrapper import OKxApiWrapper
 from btc_model.setting.setting import get_settings
+from btc_model.indicator.indicator_pi_cycle import IndicatorPiCycle
+from btc_model.indicator.indicator_bollinger import IndicatorBollinger
+
 
 class EscapeModel:
     def __init__(self, **kwargs):
         self.pi_short_window = kwargs.get('short_window', 111)
         self.pi_long_window = kwargs.get('long_window', 350)
 
-        setting = get_settings('dex.okx')
+        self.bollinger_window = kwargs.get('bollinger_window', 100)
+        self.bollinger_nbdev = kwargs.get('bollinger_nbdev', 2.5)
+
+        self.kline_data = None
+
+        setting = get_settings('cex.okx')
         self._limit = setting['limit']
         self._apikey = setting['apikey']
         self._secretkey = setting['secretkey']
         self._passphrase = setting['passphrase']
 
-        self.OKxApi = OKxApiWrapper.get_instance()
+        self.OKxApi = OKxApiWrapper.get_instance(apikey=self._apikey,
+                                                 secretkey=self._secretkey,
+                                                 passphrase=self._passphrase)
 
     def prepare_data(self):
-        total_loop_count = (self.pi_long_window // self._limit) + 1
-        rest_days = self.pi_long_window % self._limit
+        current_date = datetime.datetime.today()
+        start_dt = current_date - datetime.timedelta(days=self.pi_long_window)
 
-        all_data = []
+        self.kline_data = self.OKxApi.get_kline(symbol_id='BTC-USD',
+                                                interval='1d',
+                                                start_dt=start_dt,
+                                                end_dt=current_date
+                                                )
 
-        for i in range(total_loop_count):
-            if i == 0:
-                btc_k_line_100 = marketDataAPI.get_index_candlesticks(instId="BTC-USD", bar="1D")
-                btc_k_line_100_df = pd.DataFrame(btc_k_line_100)
-                df_size = btc_k_line_100_df['data'].size
-                for index in range(df_size):
-                    temp_k_line_sum += float(btc_k_line_100_df['data'][index][4])
-                    if index == df_size - 1:
-                        ts_100 = btc_k_line_100_df['data'][index][0]
-            elif i == total_loop_count - 1:
-                btc_k_line_100 = marketDataAPI.get_index_candlesticks(instId="BTC-USD", bar="1D",
-                                                                      after=ts_100, limit=rest_days)
-                btc_k_line_100_df = pd.DataFrame(btc_k_line_100)
-                df_size = btc_k_line_100_df['data'].size
-                for index in range(df_size):
-                    temp_k_line_sum += float(btc_k_line_100_df['data'][index][4])
-            else:
-                btc_k_line_100 = marketDataAPI.get_index_candlesticks(instId="BTC-USD", bar="1D", after=ts_100)
-                btc_k_line_100_df = pd.DataFrame(btc_k_line_100)
-                df_size = btc_k_line_100_df['data'].size
-                for index in range(df_size):
-                    temp_k_line_sum += float(btc_k_line_100_df['data'][index][4])
-                    if index == df_size - 1:
-                        ts_100 = btc_k_line_100_df['data'][index][0]
-        return (temp_k_line_sum)
     def calculate_pi(self):
+        indicator = IndicatorPiCycle()
+        result = indicator.calculate(close_array=self.kline_data['close'].to_numpy(),
+                                     short_window=self.pi_short_window,
+                                     long_window=self.pi_long_window
+                                     )
+        return result
 
+    def calculate_bollinger(self):
+        indicator = IndicatorBollinger()
+        result = indicator.calculate(close_array=self.kline_data['close'].to_numpy(),
+                                     window=self.bollinger_window,
+                                     stddev_multiple=self.bollinger_nbdev
+                                     )
+        return result
+
+
+if __name__ == "__main__":
+    model = EscapeModel(short_window=111, long_window=350)
+    model.prepare_data()
+    escape_flag_pi_cycle = model.calculate_pi()
+    escape_flag_bollinger = model.calculate_bollinger()
+    print('ok')

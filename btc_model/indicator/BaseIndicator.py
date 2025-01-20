@@ -29,7 +29,7 @@ class BaseIndicator(metaclass=abc.ABCMeta):
     def compute(self, context: Context):
         pass
 
-    @abc.abstractmethod
+
     def get_indicator_info(self):
         return {'id': self._id,
                 'name': self._name,
