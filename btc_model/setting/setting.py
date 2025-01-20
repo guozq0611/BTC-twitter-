@@ -37,9 +37,13 @@ SETTINGS: Dict[str, Any] = {
     "cex.okx.apikey": "8458f3f2-2336-45a6-8478-5faadb1faeb8",
     "cex.okx.secretkey": "C3D924B57DE38D9A3466139B4814C8D0",
     "cex.okx.passphrase": "970410Sjw.",
-    "cex.okx.proxy": "http://127.0.0.1:52469",  # 使用VPN可能需要代理
+    # "cex.okx.proxy": "http://127.0.0.1:52469",  # 使用VPN可能需要代理
+    "cex.okx.proxy": None,
     "cex.okx.limit": int(100),
 
+    "indicator.rsi.window": 14,
+    "indicator.rsi.upper": 70,
+    "indicator.ris.lower": 30,
 
 
     "database.uri": "",

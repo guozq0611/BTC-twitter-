@@ -29,4 +29,5 @@ class IndicatorRSI(BaseIndicator, ABC):
 
         return rsi
 
+    
 
