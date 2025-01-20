@@ -37,6 +37,7 @@ class EscapeModel:
 
         self.kline_data = None
         self.sth_mvrv_data = None
+        self.mvrv_zscore_data = None
 
         setting = get_settings('cex.okx')
         self._limit = setting['limit']
@@ -64,6 +65,7 @@ class EscapeModel:
                                                 )
 
         self.sth_mvrv_data = self.bitcoin_data_api.get_sth_mvrv_data(start_dt=start_dt, end_dt=current_date)
+        self.mvrv_zscore_data = self.bitcoin_data_api.get_sth_mvrv_zsccore_data(start_dt=start_dt, end_dt=current_date)
 
     def calculate_pi(self):
         indicator = IndicatorPiCycle()
@@ -114,7 +116,7 @@ class EscapeModel:
 
     def calculate_sth_mvrv(self):
         if self.sth_mvrv_data is not None and len(self.sth_mvrv_data) > 0:
-            std_mvrv = self.sth_mvrv_data[-1]
+            std_mvrv = self.sth_mvrv_data['sth_mvrv'][self.sth_mvrv_data['sth_mvrv'].notna()].iloc[-1]
 
             if std_mvrv > 2:
                 return True
@@ -122,6 +124,38 @@ class EscapeModel:
                 return False
         else:
             return False
+
+    def calculate_mvrv_zscore(self):
+        """
+        市场高估信号：
+            当 MVRV Z-Score 较高（例如，超过某个阈值，通常认为在 7 或 8 左右，但会因市场状况而异）时，这表明市场可能被高估。
+            高 MVRV Z-Score 表示比特币的市值相对于其已实现价值明显高于其历史平均值，这可能意味着当前市场价格远高于上次币转手时的平均支付价格。
+        潜在的市场顶部：
+            当 MVRV Z-Score 达到如此高的水平时，这可能是市场顶部的一个信号。这是因为高 Z-Score 意味着市场处于价格已显著偏离其市值和已实现价值之间历史关系的状态。
+            在这一点上，持有比特币一段时间的投资者可能会看到显著的未实现利润，他们可能会开始抛售，从而导致市场调整或价格下跌。
+        """
+        if self.mvrv_zscore_data is not None and len(self.mvrv_zscore_data) > 0:
+            mvrv_zscore = self.mvrv_zscore_data['mvrv_zscore'][self.mvrv_zscore_data['mvrv_zscore'].notna()].iloc[-1]
+
+            if mvrv_zscore > 8:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def calculate_fear_greed(self):
+        """
+        加密货币恐惧与贪婪指数由 Alternative.me 提供，是一个综合指标，旨在将投资者情绪浓缩为一个单一的数值。
+        它汇总了来自多个来源的数据，从而提供了一个关于市场情绪的综合视角。该指数的范围从 0 到 100，其中 0 代表 “极度恐惧”。
+        处于这个极端时，投资者情绪的特点是过度消极，表明一种普遍的谨慎和悲观情绪。相反，得分为 100 表示 “极度贪婪”，
+        意味着一种错失恐惧症（FOMO）达到顶峰的情况，并且投资者可能会过度热情和看涨。
+        如需深入理解和详细分析基础指标，请访问 Alternative.me 的原始来源。
+        :return:
+        """
+        # TODO: goto https://alternative.me/crypto/fear-and-greed-index/
+        pass
+
 
 if __name__ == "__main__":
     model = EscapeModel(short_window=111, long_window=350)
@@ -132,4 +166,5 @@ if __name__ == "__main__":
     escape_flag['rsi'] = model.calculate_rsi()
     escape_flag['macd'] = model.calculate_macd()
     escape_flag['sth_mvrv'] = model.calculate_sth_mvrv()
+    escape_flag['mvrv_zscore'] = model.calculate_mvrv_zscore()
     print(escape_flag)

@@ -15,19 +15,13 @@ from abc import ABC
 from btc_model.core.common.context import Context
 from btc_model.indicator.BaseIndicator import BaseIndicator
 
-
-class IndicatorRSI(BaseIndicator, ABC):
+# TODO: not finish
+class IndicatorSTHMVRV(BaseIndicator, ABC):
     def __init__(self):
         super().__init__()
 
     def compute(self, context: Context):
         pass
 
-    @staticmethod
-    def calculate(close_array, window):
-        rsi = talib.RSI(close_array, timeperiod=window)
 
-        return rsi
-
-    
 

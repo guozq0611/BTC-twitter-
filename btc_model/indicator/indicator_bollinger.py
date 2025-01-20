@@ -37,7 +37,4 @@ class IndicatorBollinger(BaseIndicator, ABC):
                                                            matype=0
                                                            )
 
-        if close_array[-1] > upper_band[-1] and close_array[-2] <= upper_band[-2]:
-            return True
-        else:
-            return False
+        return upper_band, middle_band, lower_band

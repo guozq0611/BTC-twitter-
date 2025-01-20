@@ -59,6 +59,7 @@ Thorp AI Agent is built with a modular architecture to ensure scalability and ma
 - [ ] MVRV z-score
 - [ ] Mayer Multiple
 - [ ] Fear & greed index
+   
 - [ ] RSI
 - [ ] Hash Bonding
 - [ ] MACD
