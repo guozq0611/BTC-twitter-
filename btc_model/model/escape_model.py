@@ -8,9 +8,6 @@ Description:
 
 """
 import datetime
-from abc import ABC
-
-import okx.MarketData as MarketData
 
 from btc_model.core.wrapper.okx_api_wrapper import OKxApiWrapper
 from btc_model.setting.setting import get_settings
@@ -33,10 +30,13 @@ class EscapeModel:
         self._apikey = setting['apikey']
         self._secretkey = setting['secretkey']
         self._passphrase = setting['passphrase']
+        self._proxy = setting['proxy']
 
         self.OKxApi = OKxApiWrapper.get_instance(apikey=self._apikey,
                                                  secretkey=self._secretkey,
-                                                 passphrase=self._passphrase)
+                                                 passphrase=self._passphrase,
+                                                 proxy=self._proxy
+                                                 )
 
     def prepare_data(self):
         current_date = datetime.datetime.today()
@@ -60,7 +60,7 @@ class EscapeModel:
         indicator = IndicatorBollinger()
         result = indicator.calculate(close_array=self.kline_data['close'].to_numpy(),
                                      window=self.bollinger_window,
-                                     stddev_multiple=self.bollinger_nbdev
+                                     nbdev=self.bollinger_nbdev
                                      )
         return result
 
@@ -70,4 +70,5 @@ if __name__ == "__main__":
     model.prepare_data()
     escape_flag_pi_cycle = model.calculate_pi()
     escape_flag_bollinger = model.calculate_bollinger()
+
     print('ok')

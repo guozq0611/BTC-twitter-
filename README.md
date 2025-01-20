@@ -24,6 +24,7 @@ Thorp AI Agent is built with a modular architecture to ensure scalability and ma
 ### Data Collection:
 - [x] Integrate Cryptocurrency Exchange APIs（OKX）
 - [ ] Collect Social Media Data
+- [ ] Collect On Chain Data
       
 ### AI Engine
 - [x] LLM（ChatGPT-o1）

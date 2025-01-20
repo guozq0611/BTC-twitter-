@@ -10,17 +10,18 @@ import okx.MarketData as MarketData
 class OKxApiWrapper(object):
     __instance = None
 
-    def __init__(self, apikey, secretkey, passphrase):
+    def __init__(self, apikey, secretkey, passphrase, proxy):
         self._market_api = MarketData.MarketAPI(api_key=apikey,
                                                 api_secret_key=secretkey,
                                                 passphrase=passphrase,
+                                                proxy=proxy,
                                                 flag='0'
                                                 )
 
     @classmethod
-    def get_instance(cls, apikey, secretkey, passphrase):
+    def get_instance(cls, apikey, secretkey, passphrase, proxy):
         if cls.__instance is None:
-            cls.__instance = cls(apikey, secretkey, passphrase)
+            cls.__instance = cls(apikey, secretkey, passphrase, proxy)
 
         return cls.__instance
 
@@ -79,7 +80,7 @@ class OKxApiWrapper(object):
             final_df.columns = [
                 'datetime', 'open', 'high', 'low', 'close', 'ignore'
             ]
-            final_df['datetime'] = pd.to_datetime(final_df['datetime'], unit='ms')
+            final_df['datetime'] = pd.to_datetime(final_df['datetime'].astype('int64'), unit='ms', origin='unix')
             final_df['symbol_id'] = symbol_id
 
 

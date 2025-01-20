@@ -8,9 +8,7 @@ Description:
 
 """
 import datetime
-
 import talib
-import talib as ta
 
 from abc import ABC
 
@@ -19,9 +17,9 @@ from btc_model.indicator.BaseIndicator import BaseIndicator
 
 
 class IndicatorBollinger(BaseIndicator, ABC):
-    params = (
-        ('time_period', 300),
-        ('stddev_multiple', 1.5)
+    _params = (
+        ('window', 100),
+        ('nbdev', 2.5)
     )
 
     def __init__(self):
@@ -31,11 +29,11 @@ class IndicatorBollinger(BaseIndicator, ABC):
         pass
 
     @staticmethod
-    def calculate(close_array, window, stddev_multiple):
+    def calculate(close_array, window, nbdev):
         upper_band, middle_band, lower_band = talib.BBANDS(close_array,
                                                            timeperiod=window,
-                                                           nbdevup=stddev_multiple,
-                                                           nbdevdn=stddev_multiple,
+                                                           nbdevup=nbdev,
+                                                           nbdevdn=nbdev,
                                                            matype=0
                                                            )
 
