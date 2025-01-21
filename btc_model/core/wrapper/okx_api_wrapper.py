@@ -90,6 +90,22 @@ class OKxApiWrapper(object):
         else:
             return None
 
+    def get_index_ticker(self, symbol_id):
+        try:
+            res = self._market_api.get_index_tickers(instId="BTC-USD")
+        except Exception as e:
+            print(f"从OKX获取行情失败, 错误信息: {e}")
+            return None
+
+        data = res['data']
+
+        df = pd.DataFrame(data)
+
+        return df
+
+
+
+
 
 if __name__ == "__main__":
     from btc_model.setting.setting import get_settings
@@ -100,10 +116,14 @@ if __name__ == "__main__":
     apikey = setting['apikey']
     secretkey = setting['secretkey']
     passphrase = setting['passphrase']
+    proxy = setting['proxy']
 
-    instance = OKxApiWrapper.get_instance(apikey, secretkey, passphrase)
+    instance = OKxApiWrapper.get_instance(apikey, secretkey, passphrase, proxy)
 
-    start_dt = '2024-01-01 00:00:00'
-    end_dt = '2025-01-18 23:59:59'
-    result = instance.get_kline("BTC-USD", '1D', start_dt, end_dt)
+    # start_dt = '2024-01-01 00:00:00'
+    # end_dt = '2025-01-18 23:59:59'
+    # result = instance.get_kline("BTC-USD", '1D', start_dt, end_dt)
+
+    result = instance.get_index_ticker(symbol_id='BTC-USD')
+
     print(result)

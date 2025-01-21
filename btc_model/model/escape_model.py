@@ -11,8 +11,10 @@ import datetime
 
 from btc_model.core.wrapper.okx_api_wrapper import OKxApiWrapper
 from btc_model.core.wrapper.bitcoin_data_api_wrapper import BitcoinDataApiWrapper
+from btc_model.core.wrapper.alternative_api_wrapper import AlternativeApiWrapper
 from btc_model.setting.setting import get_settings
 from btc_model.indicator.indicator_pi_cycle import IndicatorPiCycle
+from btc_model.indicator.indicator_mayer_multiple import IndicatorMayerMultiple
 from btc_model.indicator.indicator_bollinger import IndicatorBollinger
 from btc_model.indicator.indicator_rsi import IndicatorRSI
 from btc_model.indicator.indicator_macd import IndicatorMACD
@@ -23,6 +25,9 @@ class EscapeModel:
 
         self.pi_short_window = kwargs.get('short_window', 111)
         self.pi_long_window = kwargs.get('long_window', 350)
+
+        self.mayer_window = kwargs.get('mayer_window', 200)
+        self.mayer_threshold = kwargs.get('mayer_window', 2.4)
 
         self.bollinger_window = kwargs.get('bollinger_window', 100)
         self.bollinger_nbdev = kwargs.get('bollinger_nbdev', 2.5)
@@ -39,6 +44,9 @@ class EscapeModel:
         self.sth_mvrv_data = None
         self.mvrv_zscore_data = None
 
+        setting = get_settings('common')
+        self._proxies = setting['proxies']
+
         setting = get_settings('cex.okx')
         self._limit = setting['limit']
         self._apikey = setting['apikey']
@@ -46,13 +54,15 @@ class EscapeModel:
         self._passphrase = setting['passphrase']
         self._proxy = setting['proxy']
 
+
         self.OKxApi = OKxApiWrapper.get_instance(apikey=self._apikey,
                                                  secretkey=self._secretkey,
                                                  passphrase=self._passphrase,
                                                  proxy=self._proxy
                                                  )
 
-        self.bitcoin_data_api = BitcoinDataApiWrapper.get_instance()
+        self.bitcoin_data_api = BitcoinDataApiWrapper.get_instance(self._proxies)
+        self.alternative_api = AlternativeApiWrapper.get_instance(self._proxies)
 
     def prepare_data(self):
         current_date = datetime.datetime.today()
@@ -66,12 +76,20 @@ class EscapeModel:
 
         self.sth_mvrv_data = self.bitcoin_data_api.get_sth_mvrv_data(start_dt=start_dt, end_dt=current_date)
         self.mvrv_zscore_data = self.bitcoin_data_api.get_sth_mvrv_zsccore_data(start_dt=start_dt, end_dt=current_date)
+        self.feargreed_data = self.alternative_api.get_feargreed_data(start_dt=start_dt, end_dt=current_date)
 
     def calculate_pi(self):
         indicator = IndicatorPiCycle()
         result = indicator.calculate(close_array=self.kline_data['close'].to_numpy(),
                                      short_window=self.pi_short_window,
                                      long_window=self.pi_long_window
+                                     )
+        return result
+
+    def calculate_mayer_multiple(self):
+        indicator = IndicatorMayerMultiple()
+        result = indicator.calculate(close_array=self.kline_data['close'].to_numpy(),
+                                     window=self.mayer_window
                                      )
         return result
 
@@ -153,18 +171,33 @@ class EscapeModel:
         如需深入理解和详细分析基础指标，请访问 Alternative.me 的原始来源。
         :return:
         """
-        # TODO: goto https://alternative.me/crypto/fear-and-greed-index/
-        pass
+        if self.feargreed_data is not None and len(self.feargreed_data) > 0:
+            feergreed = self.feargreed_data['value'].iloc[-1]
+
+            if feergreed > 80:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def run(self):
+        model.prepare_data()
+        escape_flag = dict()
+        escape_flag['pi_cycle'] = model.calculate_pi()
+        escape_flag['mvrv_zscore'] = model.calculate_mvrv_zscore()
+        escape_flag['mayer_multiple'] = model.calculate_mayer_multiple()
+        escape_flag['feergreed'] = model.calculate_fear_greed()
+        escape_flag['rsi'] = model.calculate_rsi()
+        escape_flag['macd'] = model.calculate_macd()
+        escape_flag['sth_mvrv'] = model.calculate_sth_mvrv()
+        escape_flag['boll'] = model.calculate_bollinger()
+
+        return escape_flag
 
 
 if __name__ == "__main__":
-    model = EscapeModel(short_window=111, long_window=350)
-    model.prepare_data()
-    escape_flag = dict()
-    escape_flag['pi_cycle'] = model.calculate_pi()
-    escape_flag['boll'] = model.calculate_bollinger()
-    escape_flag['rsi'] = model.calculate_rsi()
-    escape_flag['macd'] = model.calculate_macd()
-    escape_flag['sth_mvrv'] = model.calculate_sth_mvrv()
-    escape_flag['mvrv_zscore'] = model.calculate_mvrv_zscore()
+    model = EscapeModel(short_window=111, long_window=350, mayer_window=200)
+    escape_flag = model.run()
+
     print(escape_flag)

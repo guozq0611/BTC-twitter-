@@ -13,13 +13,7 @@ History:
 """
 
 import pandas as pd
-from tqdm import tqdm
-from time import sleep
-import requests, time, hmac, hashlib, json, os
-from urllib.parse import urlencode
-
-recv_window = 5000
-data_path = os.getcwd() + "/data/data.json"
+import requests
 
 
 class BitcoinDataApiWrapper(object):
@@ -31,19 +25,19 @@ class BitcoinDataApiWrapper(object):
     __instance = None
 
 
-    def __init__(self):
-        pass
+    def __init__(self, proxies):
+        self.proxies = proxies
 
     @classmethod
-    def get_instance(cls):
+    def get_instance(cls, proxies):
         if cls.__instance is None:
-            cls.__instance = cls()
+            cls.__instance = cls(proxies)
 
         return cls.__instance
 
     def get_data(self, request_path, params):
         url = self.BASE_URL_V1 + '/' + request_path
-        response = requests.get(url, params=params)
+        response = requests.get(url, params=params, proxies=self.proxies)
 
         if response.status_code == 200:
             data = response.json()
