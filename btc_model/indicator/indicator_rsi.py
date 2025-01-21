@@ -16,16 +16,20 @@ from btc_model.core.common.context import Context
 from btc_model.indicator.BaseIndicator import BaseIndicator
 
 
-class IndicatorRSI(BaseIndicator, ABC):
-    def __init__(self):
-        super().__init__()
+class IndicatorRSI(BaseIndicator):
+    __params = {
+        'window': 14
+    }
 
-    def compute(self, context: Context):
-        pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-    @staticmethod
-    def calculate(close_array, window):
-        rsi = talib.RSI(close_array, timeperiod=window)
+        self.window = kwargs.get('window', self.__params['window'])
+
+    def compute(self, context: Context=None):
+        close_array = context.close_array
+
+        rsi = talib.RSI(close_array, timeperiod=self.window)
 
         return rsi
 

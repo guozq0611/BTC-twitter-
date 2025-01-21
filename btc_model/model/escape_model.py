@@ -19,41 +19,51 @@ from btc_model.indicator.indicator_bollinger import IndicatorBollinger
 from btc_model.indicator.indicator_rsi import IndicatorRSI
 from btc_model.indicator.indicator_macd import IndicatorMACD
 
+from btc_model.core.common.context import Context
+
 
 class EscapeModel:
     def __init__(self, **kwargs):
 
-        self.pi_short_window = kwargs.get('short_window', 111)
-        self.pi_long_window = kwargs.get('long_window', 350)
+        setting = kwargs.get('setting', {})
 
-        self.mayer_window = kwargs.get('mayer_window', 200)
-        self.mayer_threshold = kwargs.get('mayer_window', 2.4)
+        self.pi_cycle_short_window = setting.get('pi_cycle.short_window', 111)
+        self.pi_cycle_long_window = setting.get('pi_cycle.long_window', 350)
 
-        self.bollinger_window = kwargs.get('bollinger_window', 100)
-        self.bollinger_nbdev = kwargs.get('bollinger_nbdev', 2.5)
+        self.mvrv_zscore_threshold = setting.get('mvrv_zscore.threshold', 8)
 
-        self.rsi_window = kwargs.get('rsi_window', 14)
-        self.rsi_upper = kwargs.get('rsi_upper', 70)
-        self.rsi_lower = kwargs.get('rsi_lower', 30)
+        self.mayer_window = setting.get('mayer_multiple.window', 200)
+        self.mayer_threshold = setting.get('mayer_multiple.threshold', 2.4)
 
-        self.macd_fast_period = kwargs.get('macd_fast_period', 12)
-        self.macd_slow_period = kwargs.get('macd_slow_period', 26)
-        self.macd_signal_period = kwargs.get('macd_signal_period', 9)
+        self.feargreed_threshold = setting.get('feargreed.threshold', 80)
+
+        self.rsi_window = setting.get('rsi.window', 14)
+        self.rsi_upper = setting.get('rsi.upper', 70)
+        self.rsi_lower = setting.get('rsi.lower', 30)
+
+        self.macd_fast_period = setting.get('macd.fast_period', 12)
+        self.macd_slow_period = setting.get('macd.slow_period', 26)
+        self.macd_signal_period = setting.get('macd.signal_period', 9)
+
+        self.sth_mvrv_threshold = setting.get('sth_mvrv.threshold', 2)
+
+        self.bollinger_window = setting.get('bollinger.window', 100)
+        self.bollinger_nbdev = setting.get('bollinger.nbdev', 2.5)
 
         self.kline_data = None
+        self.close_array = None
         self.sth_mvrv_data = None
         self.mvrv_zscore_data = None
+        self.feargreed_data = None
 
         setting = get_settings('common')
         self._proxies = setting['proxies']
 
         setting = get_settings('cex.okx')
-        self._limit = setting['limit']
         self._apikey = setting['apikey']
         self._secretkey = setting['secretkey']
         self._passphrase = setting['passphrase']
         self._proxy = setting['proxy']
-
 
         self.OKxApi = OKxApiWrapper.get_instance(apikey=self._apikey,
                                                  secretkey=self._secretkey,
@@ -64,54 +74,61 @@ class EscapeModel:
         self.bitcoin_data_api = BitcoinDataApiWrapper.get_instance(self._proxies)
         self.alternative_api = AlternativeApiWrapper.get_instance(self._proxies)
 
-    def prepare_data(self):
-        current_date = datetime.datetime.today()
-        start_dt = current_date - datetime.timedelta(days=self.pi_long_window)
+        self.context = Context()
 
+    def prepare_data(self):
+        # 用当前日期、指标最大回溯窗口计算开始日期，结束日期为当前日期
+        current_date = datetime.datetime.today()
+        start_dt = current_date - datetime.timedelta(days=max(self.pi_cycle_long_window,
+                                                              self.rsi_window,
+                                                              self.mayer_window,
+                                                              self.bollinger_window
+                                                              )
+                                                     )
+        end_dt = current_date
+
+        # 准备好kline、sth_mvrv、mvrv_zscore、feargreed等数据
+        # sth_mvrv、mvrv_zscore、feargreed尚无底层数据，直接从其他免费获取数据的平台网站获取最终指标
         self.kline_data = self.OKxApi.get_kline(symbol_id='BTC-USD',
                                                 interval='1d',
                                                 start_dt=start_dt,
-                                                end_dt=current_date
+                                                end_dt=end_dt
                                                 )
 
         self.sth_mvrv_data = self.bitcoin_data_api.get_sth_mvrv_data(start_dt=start_dt, end_dt=current_date)
         self.mvrv_zscore_data = self.bitcoin_data_api.get_sth_mvrv_zsccore_data(start_dt=start_dt, end_dt=current_date)
         self.feargreed_data = self.alternative_api.get_feargreed_data(start_dt=start_dt, end_dt=current_date)
 
-    def calculate_pi(self):
-        indicator = IndicatorPiCycle()
-        result = indicator.calculate(close_array=self.kline_data['close'].to_numpy(),
-                                     short_window=self.pi_short_window,
-                                     long_window=self.pi_long_window
+        # 使用上下文变量（context）保存kline_data、close_array; close_array定义为np.array类型，提高计算效率
+        self.context.kline_data = self.kline_data
+        self.context.close_array = self.kline_data['close'].to_numpy()
+
+    def calculate_pi_cycle(self):
+        indicator = IndicatorPiCycle(short_window=self.pi_cycle_short_window,
+                                     long_window=self.pi_cycle_long_window
                                      )
-        return result
+
+        return indicator.compute(self.context)
 
     def calculate_mayer_multiple(self):
-        indicator = IndicatorMayerMultiple()
-        result = indicator.calculate(close_array=self.kline_data['close'].to_numpy(),
-                                     window=self.mayer_window
-                                     )
-        return result
+        indicator = IndicatorMayerMultiple(window=self.mayer_window)
+        return indicator.compute(self.context)
+
 
     def calculate_bollinger(self):
-        close_array = self.kline_data['close'].to_numpy()
+        indicator = IndicatorBollinger(window=self.bollinger_window,
+                                       nbdev=self.bollinger_nbdev
+                                       )
+        upper_band, middle_band, lower_band = indicator.compute(self.context)
 
-        indicator = IndicatorBollinger()
-        upper_band, middle_band, lower_band = indicator.calculate(close_array=close_array,
-                                                                  window=self.bollinger_window,
-                                                                  nbdev=self.bollinger_nbdev
-                                                                  )
-
-        if close_array[-1] > upper_band[-1] and close_array[-2] <= upper_band[-2]:
+        if self.context.close_array[-1] > upper_band[-1] and self.context.close_array[-2] <= upper_band[-2]:
             return True
         else:
             return False
 
     def calculate_rsi(self):
-        indicator = IndicatorRSI()
-        rsi = indicator.calculate(close_array=self.kline_data['close'].to_numpy(),
-                                  window=self.rsi_window,
-                                  )
+        indicator = IndicatorRSI(window=self.rsi_window)
+        rsi = indicator.compute(self.context)
 
         if len(rsi) > 0 and rsi[-1] > self.rsi_upper:
             return True
@@ -119,12 +136,12 @@ class EscapeModel:
             return False
 
     def calculate_macd(self):
-        indicator = IndicatorMACD()
-        dif, dea, hist = indicator.calculate(close_array=self.kline_data['close'].to_numpy(),
-                                             fast_period=self.macd_fast_period,
-                                             slow_period=self.macd_slow_period,
-                                             signal_period=self.macd_signal_period
-                                             )
+        indicator = IndicatorMACD(fast_period=self.macd_fast_period,
+                                  slow_period=self.macd_slow_period,
+                                  signal_period=self.macd_signal_period
+                                  )
+
+        dif, dea, hist = indicator.compute(context=self.context)
 
         # 判断是否死叉
         if len(dif) > 2 and dif[-1] < dea[-1] and dif[-2] > dea[-2]:
@@ -172,9 +189,9 @@ class EscapeModel:
         :return:
         """
         if self.feargreed_data is not None and len(self.feargreed_data) > 0:
-            feergreed = self.feargreed_data['value'].iloc[-1]
+            feargreed = self.feargreed_data['value'].iloc[-1]
 
-            if feergreed > 80:
+            if feargreed > self.feargreed_threshold:
                 return True
             else:
                 return False
@@ -182,22 +199,31 @@ class EscapeModel:
             return False
 
     def run(self):
-        model.prepare_data()
+        """
+        计算逃顶指标，以True/False为标记，组合成dict返回
+        :return: 各逃顶指标的信号组合
+        """
+        self.prepare_data()
+
         escape_flag = dict()
-        escape_flag['pi_cycle'] = model.calculate_pi()
-        escape_flag['mvrv_zscore'] = model.calculate_mvrv_zscore()
-        escape_flag['mayer_multiple'] = model.calculate_mayer_multiple()
-        escape_flag['feergreed'] = model.calculate_fear_greed()
-        escape_flag['rsi'] = model.calculate_rsi()
-        escape_flag['macd'] = model.calculate_macd()
-        escape_flag['sth_mvrv'] = model.calculate_sth_mvrv()
-        escape_flag['boll'] = model.calculate_bollinger()
+        escape_flag['pi_cycle'] = self.calculate_pi_cycle()
+        escape_flag['mvrv_zscore'] = self.calculate_mvrv_zscore()
+        escape_flag['mayer_multiple'] = self.calculate_mayer_multiple()
+        escape_flag['feargreed'] = self.calculate_fear_greed()
+        escape_flag['rsi'] = self.calculate_rsi()
+        escape_flag['macd'] = self.calculate_macd()
+        escape_flag['sth_mvrv'] = self.calculate_sth_mvrv()
+        escape_flag['boll'] = self.calculate_bollinger()
 
         return escape_flag
 
 
 if __name__ == "__main__":
-    model = EscapeModel(short_window=111, long_window=350, mayer_window=200)
-    escape_flag = model.run()
+    from btc_model.setting.setting import get_settings
 
-    print(escape_flag)
+    params = get_settings('escape_model.indicator')
+
+    model = EscapeModel(setting=params)
+    result = model.run()
+
+    print(result)

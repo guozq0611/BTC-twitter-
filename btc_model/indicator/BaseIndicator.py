@@ -8,12 +8,12 @@ Description:
 
 """
 import datetime
-import abc
+from abc import ABC
 
 from btc_model.core.common.context import Context
 
 
-class BaseIndicator(metaclass=abc.ABCMeta):
+class BaseIndicator(ABC):
     """
     指标基础类
     """
@@ -22,13 +22,11 @@ class BaseIndicator(metaclass=abc.ABCMeta):
     _description: str
     _author: str
 
-    def __init__(self):
-        self.context = Context()
-
-    @abc.abstractmethod
-    def compute(self, context: Context):
+    def __init__(self, **kwargs):
         pass
 
+    def compute(self, context: Context):
+        pass
 
     def get_indicator_info(self):
         return {'id': self._id,

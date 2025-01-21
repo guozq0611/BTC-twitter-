@@ -15,10 +15,12 @@ from btc_model.core.util.file_util import FileUtil
 
 
 SETTINGS: Dict[str, Any] = {
-    "common.proxies": {
-        'http': 'http://127.0.0.1:52469',
-        'https': 'http://127.0.0.1:52469'
-    },
+    # 配置request url需要的proxies，如果网络环境无需代理，注释即可
+    # "common.proxies": {
+    #     'http': 'http://127.0.0.1:52469',
+    #     'https': 'http://127.0.0.1:52469'
+    # },
+
 
     "font.family": "微软雅黑",
     "font.size": 12,
@@ -35,22 +37,40 @@ SETTINGS: Dict[str, Any] = {
     "email.sender": "",
     "email.receiver": "",
 
-    "datafeed.name": "",
-    "datafeed.username": "",
-    "datafeed.password": "",
-
     "cex.okx.apikey": "8458f3f2-2336-45a6-8478-5faadb1faeb8",
     "cex.okx.secretkey": "C3D924B57DE38D9A3466139B4814C8D0",
     "cex.okx.passphrase": "970410Sjw.",
-    "cex.okx.proxy": "http://127.0.0.1:52469",  # 使用VPN可能需要代理
-    # "cex.okx.proxy": None,
-    "cex.okx.limit": int(100),
+    # 配置okx用的代理，若网络网络无需代理，设置为None
+    # "cex.okx.proxy": "http://127.0.0.1:52469",
+    "cex.okx.proxy": None,
 
+    # ------------------------------------------------------
+    # 设置逃顶模型各指标的参数
+    # ------------------------------------------------------
+    "escape_model.indicator.pi_cycle.short_window": 111,
+    "escape_model.indicator.pi_cycle.long_window": 350,
+    "escape_model.indicator.pi_cycle.threshold": 2,
 
-    "indicator.rsi.window": 14,
-    "indicator.rsi.upper": 70,
-    "indicator.ris.lower": 30,
+    "escape_model.indicator.mvrv_zscore.threshold": 8,
 
+    "escape_model.indicator.mayer_multiple.window": 200,
+    "escape_model.indicator.mayer_multiple.threshold": 2.4,
+
+    "escape_model.indicator.feargreed.threshold": 80,
+
+    "escape_model.indicator.rsi.window": 14,
+    "escape_model.indicator.rsi.upper": 70,
+    "escape_model.indicator.rsi.lower": 30,
+
+    "escape_model.indicator.macd.fast_period": 12,
+    "escape_model.indicator.macd.slow_period": 26,
+    "escape_model.indicator.macd.signal_period": 9,
+
+    "escape_model.indicator.sth_mvrv.threshold": 2,
+
+    "escape_model.indicator.bollinger.window": 100,
+    "escape_model.indicator.bollinger.nbdev": 2.5,
+    # ------------------------------------------------------
 
     "database.uri": "",
     "database.name": "",
