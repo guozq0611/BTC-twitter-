@@ -13,6 +13,7 @@ from typing import Dict, Any
 from tzlocal import get_localzone
 from btc_model.core.util.file_util import FileUtil
 
+PROJECT_NAME = 'ThorpAI'
 
 SETTINGS: Dict[str, Any] = {
     # 配置request url需要的proxies，如果网络环境无需代理，注释即可
