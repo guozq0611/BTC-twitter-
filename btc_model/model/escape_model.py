@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Author: guozq
-
-Create Date: 2025/01/19
-
-Description:
-
-"""
 import datetime
 
 from btc_model.core.wrapper.okx_api_wrapper import OKxApiWrapper
@@ -89,11 +80,11 @@ class EscapeModel:
 
         # 准备好kline、sth_mvrv、mvrv_zscore、feargreed等数据
         # sth_mvrv、mvrv_zscore、feargreed尚无底层数据，直接从其他免费获取数据的平台网站获取最终指标
-        self.kline_data = self.OKxApi.get_kline(symbol_id='BTC-USD',
-                                                interval='1d',
-                                                start_dt=start_dt,
-                                                end_dt=end_dt
-                                                )
+        self.kline_data = self.OKxApi.get_history_kline_data(symbol_id='BTC-USD',
+                                                             interval='1d',
+                                                             start_dt=start_dt,
+                                                             end_dt=end_dt
+                                                             )
 
         self.sth_mvrv_data = self.bitcoin_data_api.get_sth_mvrv_data(start_dt=start_dt, end_dt=current_date)
         self.mvrv_zscore_data = self.bitcoin_data_api.get_sth_mvrv_zsccore_data(start_dt=start_dt, end_dt=current_date)

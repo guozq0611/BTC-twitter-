@@ -1,13 +1,3 @@
-# -*- coding: UTF-8 –*-
-
-"""
-Author: guozq
-
-Create Date: 2025/01/22
-
-Description:
-
-"""
 import platform
 import pandas as pd
 import numpy as np

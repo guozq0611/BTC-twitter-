@@ -1,15 +1,3 @@
-# -*- coding: UTF-8 –*-
-
-"""
-Author:
-
-Create Date: 2021/6/18
-
-Description:
-
-"""
-
-
 def singleton(cls):
     instances = {}
 

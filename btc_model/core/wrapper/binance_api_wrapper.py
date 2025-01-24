@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*
 import pandas as pd
 from tqdm import tqdm
 from time import sleep
@@ -6,8 +5,6 @@ import requests, time, hmac, hashlib, json, os
 from urllib.parse import urlencode
 
 recv_window = 5000
-data_path = os.getcwd() + "/data/data.json"
-
 
 class BinanceApiWrapper(object):
     BASE_URL = "https://www.binance.com/api/v1"
@@ -200,13 +197,6 @@ class BinanceApiWrapper(object):
         }
         requests.post(api_url, json.dumps(json_text), headers=headers).content
 
-    def get_cointype(self):
-        '''读取json文件'''
-        tmp_json = {}
-        with open(data_path, 'r') as f:
-            tmp_json = json.load(f)
-            f.close()
-        return tmp_json["config"]["cointype"]
 
     ### ----私有函数---- ###
     def _order(self, market, quantity, side, price=None):

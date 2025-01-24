@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Author: guozq
-
-Create Date: 2022/5/22 17:39
-
-Description:
-
-"""
 import os
 from logging import CRITICAL
 from typing import Dict, Any
@@ -42,8 +33,8 @@ SETTINGS: Dict[str, Any] = {
     "cex.okx.secretkey": "C3D924B57DE38D9A3466139B4814C8D0",
     "cex.okx.passphrase": "970410Sjw.",
     # 配置okx用的代理，若网络网络无需代理，设置为None
-    # "cex.okx.proxy": "http://127.0.0.1:52469",
-    "cex.okx.proxy": None,
+    "cex.okx.proxy": "http://127.0.0.1:52469",
+    # "cex.okx.proxy": None,
 
     # ------------------------------------------------------
     # 设置逃顶模型各指标的参数

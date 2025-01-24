@@ -1,15 +1,6 @@
-# -*- coding: utf-8 -*-
 """
-Author: guozq
-
-Create Date: 2025-01-19
-
-Description:
-    Wrapper for fetching data of indicators provided by BGeometrics (www.bitcoin-data.com).
-    These indicators are freely available from BGeometrics but cannot be obtained for free through exchange APIs.
-
-History:
-    2025-01-19: initial version.
+Wrapper for fetching data of indicators provided by BGeometrics (www.bitcoin-data.com).
+These indicators are freely available from BGeometrics but cannot be obtained for free through exchange APIs.
 """
 
 import pandas as pd

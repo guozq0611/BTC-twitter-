@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Author: guozq
-
-Create Date: 2025/01/19
-
-Description:
-
-"""
 import datetime
 import numpy as np
 from abc import ABC

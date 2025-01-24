@@ -1,14 +1,3 @@
-# -*- coding: UTF-8 –*-
-
-"""
-Author: guozq
-
-Create Date: 2021/6/29
-
-Description:
-
-"""
-
 import datetime
 import json
 import os

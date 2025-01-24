@@ -1,13 +1,3 @@
-# -*- coding: UTF-8 –*-
-
-"""
-Author: guozq
-
-Create Date: 2021/6/18
-
-Description:
-
-"""
 from time import time
 from btc_model.core.common.singleton import singleton
 
