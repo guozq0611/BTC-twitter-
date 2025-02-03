@@ -2,10 +2,12 @@ from enum import Enum
 
 PROJECT_NAME = 'ThorpAI'
 
+
 class Interval(Enum):
     """
     interval of bar data.
     """
+    NONE = "NONE"
     MINUTE_1 = "1m"
     MINUTE_5 = "5m"
     MINUTE_15 = "15m"
@@ -15,24 +17,36 @@ class Interval(Enum):
     WEEKLY = "1w"
     TICK = "tick"
 
-class SecurityType(Enum):
-    NONE = 0
-    EQUITY = 1
-    FUTURE = 2
-    OPTION = 3
-    FOREX = 4
-    METAL = 5
-    BOND = 6
-    REPO = 7
-    OPENFUND = 8
-    INDEX = 9
-    FORWARD = 10
+
+class InstrumentType(Enum):
+    STOCK = 'STOCK'
+    FUTURE = 'FUTURE'
+    OPTION = 'OPTION'
+    BOND = 'BOND'
+    OPENFUND = 'OF'
+    ETF = 'ETF'
+    INDEX = 'INDEX'
+    CRYPTO = 'CRYPTO'
+
+
+class Product(Enum):
+    # 股指期货
+
+    # 商品期货
+
+    # 加密货币
+    SPOT = 'SPOT'  # Spot
+    MARGIN = 'MARGIN'  # Margin
+    SWAP = 'SWAP'  # Perpetual Futures
+    FUTURES = 'FUTURES'  # Expiry Futures
+    OPTION = 'OPTION'  # Option
 
 
 class Exchange(Enum):
     """
     Exchange.
     """
+    NONE = ""
     # Chinese
     SSE = "SSE"  # Shanghai Stock Exchange
     SZSE = "SZSE"  # Shenzhen Stock Exchange
@@ -57,3 +71,26 @@ class Exchange(Enum):
     OKX = "OKX"  # OKX Exchange
 
 
+class ProviderType(Enum):
+    """
+    数据提供方
+    """
+    NONE = 'NONE'
+    ALTERNATIVE = 'ALTERNATIVE'
+    BLOCKCHAIN = 'BLOCKCHAIN'  # https://api.blockchain.com/
+    BITCOIN_DATA = 'BITCOIN_DATA'  # https://bitcoin-data.com
+    GLASSNODE = 'GLASSNODE'
+    BINANCE = 'BINANCE'
+    OKX = 'OKX'
+
+
+class EntityType(Enum):
+    INSTRUMENT = 'INSTRUMENT'
+    KLINE = 'KLINE'
+    KLINE_INDEX = 'KLINE_INDEX'
+    INDICATOR = 'INDICATOR'
+    FACTOR = 'FACTOR'
+    FEATURE = 'FEATURE'
+    ORDER = 'ORDER'
+    TRADE = 'TRADE'
+    ACCOUNT = 'ACCOUNT'
