@@ -20,6 +20,12 @@ from btc_model.core.util.file_util import FileUtil
 
 class CryptoDataLoader():
     def __init__(self, data_directory):
+        """
+        初始化 CryptoDataLoader 类的实例。
+
+        参数:
+        data_directory (str): 数据文件所在的目录路径。
+        """
         self.data_directory = data_directory
 
     def _internal_load_data(self,
@@ -28,17 +34,32 @@ class CryptoDataLoader():
                             interval: Interval,
                             provider_type: ProviderType
                             ):
+        """
+        内部方法，用于加载指定交易所、实体类型、时间间隔和数据提供者类型的数据。
+
+        参数:
+        exchange (Exchange): 交易所类型。
+        entity_type (EntityType): 实体类型，如KLINE、INSTRUMENT等。
+        interval (Interval): 时间间隔，如DAILY、HOURLY等。
+        provider_type (ProviderType): 数据提供者类型。
+
+        返回:
+        pd.DataFrame: 加载的数据，如果文件不存在则返回None。
+        """
+        # 获取本地实体数据的根路径
         root_path = FileUtil.get_local_entity_root_path(output_dir=self.data_directory,
                                                         entity_type=entity_type,
                                                         interval=interval,
                                                         exchange=exchange,
                                                         provider_type=provider_type
                                                         )
+        # 如果路径不存在，返回None
         if not os.path.exists(root_path):
             return None
 
         # 读取 Parquet 文件
         data = pd.read_parquet(root_path)
+        # 重置索引
         data.reset_index(inplace=True)
         return data
 
