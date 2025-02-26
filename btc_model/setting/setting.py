@@ -6,10 +6,12 @@ from btc_model.core.util.file_util import FileUtil
 
 SETTINGS: Dict[str, Any] = {
     # 配置request url需要的proxies，如果网络环境无需代理，注释即可
-    # "common.proxies": {
-    #     'http': 'http://127.0.0.1:52469',
-    #     'https': 'http://127.0.0.1:52469'
-    # },
+    "common.proxies": {
+        # 'http': 'http://127.0.0.1:52469',
+        # 'https': 'http://127.0.0.1:52469'
+        'http': 'http://127.0.0.1:7897',
+        'https': 'http://127.0.0.1:7897'
+    },
 
 
     "font.family": "微软雅黑",

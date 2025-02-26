@@ -64,6 +64,8 @@ class OKxApiWrapper(object):
             bar = '30m'
         elif interval == Interval.DAILY:
             bar = '1D'
+        elif interval == Interval.DAILY_UTC:
+            bar = '1Dutc'
         else:
             raise Exception(f'输入参数【interval={interval}】无效或尚未支持!')
 

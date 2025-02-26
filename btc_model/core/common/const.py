@@ -16,6 +16,7 @@ class Interval(Enum):
     DAILY = "1d"
     WEEKLY = "1w"
     TICK = "tick"
+    DAILY_UTC = "1d_utc"
 
 
 class InstrumentType(Enum):

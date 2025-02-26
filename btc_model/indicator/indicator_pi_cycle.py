@@ -9,14 +9,14 @@ from btc_model.indicator.base_indicator import BaseIndicator
 
 class IndicatorPiCycle(BaseIndicator):
     """
-    Pi Cycle通过比特币的200日移动平均线与111日移动平均线的交叉，
+    Pi Cycle通过比特币的350日移动平均线与111日移动平均线的交叉，
     帮助预测比特币价格的顶部和底部，常用于捕捉市场反转信号。
 
-    当200日MA与111日MA交叉时，通常被视为价格反转的预兆。
+    当350日MA与111日MA交叉时，通常被视为价格反转的预兆。
     """
     _id = 'pi_cycle'
     _name = 'Pi Cycle'
-    _description = 'Pi Cycle通过200日和111日移动平均线的交叉，预测比特币价格的顶部和底部。'
+    _description = 'Pi Cycle通过350日和111日移动平均线的交叉，预测比特币价格的顶部和底部。'
 
     _params = {
         'short_window': 111,
