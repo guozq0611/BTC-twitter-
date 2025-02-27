@@ -6,27 +6,21 @@ import traceback
 from typing import Dict, Tuple
 from collections import defaultdict
 
-from btc_model.setting.setting import get_settings
-
-setting = get_settings('common')
-proxy = get_settings('common')['proxies']['http']
-
 params = {
     'enableRateLimit': True,
     'proxies': {
-        'http': proxy,
-        'https': proxy,
+        'http': os.getenv('http_proxy'),
+        'https': os.getenv('https_proxy'),
     },
-    'aiohttp_proxy': proxy,
-    'ws_proxy': proxy
+    'aiohttp_proxy': os.getenv('http_proxy'),
+    'ws_proxy': os.getenv('http_proxy')
 }
-
 
 class Monitor:
     def __init__(self, exchange_a, exchange_b, pairs):
         self.exchange_a = exchange_a
         self.exchange_b = exchange_b
-
+        
         # 构建symbol映射关系
         self.symbol_map = self._build_symbol_map(pairs)
         self.pair_data: Dict[Tuple[str, str], dict] = {}
@@ -67,18 +61,18 @@ class Monitor:
 
             pair_map = self.symbol_map[index][symbol]
             pair_key = pair_map['pair_key']
-
+            
             # 初始化数据结构
             if pair_key not in self.pair_data:
                 self.pair_data[pair_key] = {
                     'price_a': None,
                     'price_b': None,
                     'spread': None
-                }
+                } 
 
             price_field = f'price_{index}'
             self.pair_data[pair_key][price_field] = ticker['last']
-
+ 
             # 立即计算价差
             await self.calculate_spread(pair_key)
 
@@ -92,7 +86,7 @@ class Monitor:
                 data['spread'] = spread
 
                 # 触发报警的价差阈值
-                if spread > 0.01:
+                if spread > 0.01:  
                     await self.trigger_arbitrage(pair_key)
         except (TypeError, ZeroDivisionError) as e:
             print(f"价差计算错误 {pair_key}: {str(e)}")
@@ -118,21 +112,19 @@ class Monitor:
         await self.exchange_a.close()
         await self.exchange_b.close()
 
-
 async def main(exchange_a, exchange_b, pairs):
     await exchange_a.load_markets()
     await exchange_b.load_markets()
 
     monitor = Monitor(exchange_a, exchange_b, pairs)
     monitor.start()
-
+    
     try:
         while True:
             await asyncio.sleep(1)
     except:
         await monitor.stop()
         print("监控已停止")
-
 
 if __name__ == "__main__":
     try:
@@ -149,7 +141,7 @@ if __name__ == "__main__":
     # 交易所初始化
     exchange_a = ccxtpro.binance(params)
     exchange_b = ccxtpro.okx(params)
-
+    
     try:
         asyncio.run(main(exchange_a, exchange_b, pairs))
     except KeyboardInterrupt:

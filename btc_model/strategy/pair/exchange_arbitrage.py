@@ -6,33 +6,25 @@ from typing import Dict, List
 from btc_model.setting.setting import get_settings
 
 
-setting = get_settings('common')
-
 class ExchangeArbitrage:
-    def __init__(self, exchange1, exchange2, params=None):
-        self.exchange1 = exchange1
-        self.exchange2 = exchange2
-        self.params = params or {
-            'enableRateLimit': True,
-            'proxies': {
-                "http": get_settings('common')['proxies']['http'],
-                "https": get_settings('common')['proxies']['https'],
-            }
-        }
+    def __init__(self, exchange_a, exchange_b):
+        self.exchange_a = exchange_a
+        self.exchange_b = exchange_b
+
         
     def load_pairs(self, type_a="spot", subtype_a=None, type_b="spot", subtype_b=None):
-        self.exchange1.load_markets()
-        self.exchange2.load_markets()
+        self.exchange_a.load_markets()
+        self.exchange_b.load_markets()
 
         markets_a = {
             (m['base'], m['quote']): m['symbol']
-            for m in self.exchange1.markets.values() 
+            for m in self.exchange_a.markets.values()
             if m['type'] == type_a and (subtype_a is None or m[subtype_a])
         }
         markets_b = {
             (m['base'], m['quote']): m['symbol']
-            for m in self.exchange2.markets.values()
-            if m['type'] == type_b and (subtype_b is None or [subtype_b])
+            for m in self.exchange_b.markets.values()
+            if m['type'] == type_b and (subtype_b is None or m[subtype_b])
         }
 
         pair_keys = set(markets_a.keys()).intersection(set(markets_b.keys()))
@@ -111,8 +103,16 @@ class ExchangeArbitrage:
 
 
 if __name__ == "__main__":
-    binance = ccxt.binance(setting)
-    okx = ccxt.okx(setting)
+    params = {
+            'enableRateLimit': True,
+            'proxies': {
+                "http": get_settings('common')['proxies']['http'],
+                "https": get_settings('common')['proxies']['https'],
+            }
+        }
+            
+    binance = ccxt.binance(params)
+    okx = ccxt.okx(params)
 
     exchange_arbitrage = ExchangeArbitrage(binance, okx)
     abnormal_pairs, normal_pairs = exchange_arbitrage.run()
