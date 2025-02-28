@@ -1,7 +1,7 @@
 import os
 from logging import CRITICAL
 from typing import Dict, Any
-from tzlocal import get_localzone
+
 from btc_model.core.util.file_util import FileUtil
 
 SETTINGS: Dict[str, Any] = {
@@ -29,9 +29,14 @@ SETTINGS: Dict[str, Any] = {
     "email.sender": "",
     "email.receiver": "",
 
-    "cex.okx.apikey": "8458f3f2-2336-45a6-8478-5faadb1faeb8",
-    "cex.okx.secretkey": "C3D924B57DE38D9A3466139B4814C8D0",
-    "cex.okx.passphrase": "970410Sjw.",
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # 为避免真实账户信息泄露，这里填写的是模拟账户的apikey和secretkey
+    # 如果需要使用实盘账户，请在os.getenv('cex_okx')中填写实盘账户的apikey和secretkey
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    "cex.okx.apikey": "dede12e9-ec61-4212-944e-9ac5138f743b",
+    "cex.okx.secretkey": "E70C2C82FDC68D98DC7252B83745B38F",
+    "cex.okx.passphrase": "Qwe123!@#",
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # 配置okx用的代理，若网络网络无需代理，设置为None
     # "cex.okx.proxy": "http://127.0.0.1:52469",
     "cex.okx.proxy": None,
@@ -97,4 +102,22 @@ def get_settings(prefix: str = "") -> Dict[str, Any]:
         prefix_length += 1
 
     return {k[prefix_length:]: v for k, v in SETTINGS.items() if k.startswith(prefix)}
+
+
+def get_proxy_settings():
+    # 优先使用环境变量
+    http_proxy = os.getenv('http_proxy')
+    https_proxy = os.getenv('https_proxy')
+    
+    if http_proxy and https_proxy:
+        return {
+            "http": http_proxy,
+            "https": https_proxy
+        }
+    
+    # 如果环境变量未设置，使用 SETTINGS 中的配置
+    return SETTINGS.get("common.proxies", {
+        "http": "http://127.0.0.1:7890",
+        "https": "http://127.0.0.1:7890"
+    })
 

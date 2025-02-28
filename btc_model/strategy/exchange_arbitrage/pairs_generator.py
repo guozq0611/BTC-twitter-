@@ -6,7 +6,7 @@ from typing import Dict, List
 from btc_model.setting.setting import get_settings
 
 
-class ExchangeArbitrage:
+class PairsGenerator:
     def __init__(self, exchange_a, exchange_b):
         self.exchange_a = exchange_a
         self.exchange_b = exchange_b
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     binance = ccxt.binance(params)
     okx = ccxt.okx(params)
 
-    exchange_arbitrage = ExchangeArbitrage(binance, okx)
-    abnormal_pairs, normal_pairs = exchange_arbitrage.run()
+    pairs_generator = PairsGenerator(binance, okx)
+    abnormal_pairs, normal_pairs = pairs_generator.run()
     pd.DataFrame(normal_pairs).to_csv("normal_pairs.csv")
     pd.DataFrame(abnormal_pairs).to_csv("abnormal_pairs.csv")

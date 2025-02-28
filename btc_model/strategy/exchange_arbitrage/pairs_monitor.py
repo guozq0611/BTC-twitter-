@@ -6,17 +6,19 @@ import traceback
 from typing import Dict, Tuple
 from collections import defaultdict
 
+from btc_model.setting.setting import get_settings
+
 params = {
     'enableRateLimit': True,
     'proxies': {
-        'http': os.getenv('http_proxy'),
-        'https': os.getenv('https_proxy'),
+        'http': get_settings('common')['proxies']['http'],
+        'https': get_settings('common')['proxies']['https'],
     },
-    'aiohttp_proxy': os.getenv('http_proxy'),
-    'ws_proxy': os.getenv('http_proxy')
+    'aiohttp_proxy': get_settings('common')['proxies']['http'],
+    'ws_proxy': get_settings('common')['proxies']['http']
 }
 
-class Monitor:
+class PairsMonitor:
     def __init__(self, exchange_a, exchange_b, pairs):
         self.exchange_a = exchange_a
         self.exchange_b = exchange_b
@@ -112,18 +114,18 @@ class Monitor:
         await self.exchange_a.close()
         await self.exchange_b.close()
 
-async def main(exchange_a, exchange_b, pairs):
+async def run_monitor(exchange_a, exchange_b, pairs):
     await exchange_a.load_markets()
     await exchange_b.load_markets()
 
-    monitor = Monitor(exchange_a, exchange_b, pairs)
-    monitor.start()
+    pairs_monitor = PairsMonitor(exchange_a, exchange_b, pairs)
+    pairs_monitor.start()
     
     try:
         while True:
             await asyncio.sleep(1)
     except:
-        await monitor.stop()
+        await pairs_monitor.stop()
         print("监控已停止")
 
 if __name__ == "__main__":
@@ -143,6 +145,6 @@ if __name__ == "__main__":
     exchange_b = ccxtpro.okx(params)
     
     try:
-        asyncio.run(main(exchange_a, exchange_b, pairs))
+        asyncio.run(run_monitor(exchange_a, exchange_b, pairs))
     except KeyboardInterrupt:
         print("程序已终止")
