@@ -33,16 +33,29 @@ SETTINGS: Dict[str, Any] = {
     # 为避免真实账户信息泄露，这里填写的是模拟账户的apikey和secretkey
     # 如果需要使用实盘账户，请在os.getenv('cex_okx')中填写实盘账户的apikey和secretkey
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    "cex.okx.apikey": "dede12e9-ec61-4212-944e-9ac5138f743b",
-    "cex.okx.secretkey": "E70C2C82FDC68D98DC7252B83745B38F",
-    "cex.okx.passphrase": "Qwe123!@#",
-    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # 配置okx用的代理，若网络网络无需代理，设置为None
-    # "cex.okx.proxy": "http://127.0.0.1:52469",
-    "cex.okx.proxy": None,
+    # "cex.okx.apikey": "dede12e9-ec61-4212-944e-9ac5138f743b",
+    # "cex.okx.secretkey": "E70C2C82FDC68D98DC7252B83745B38F",
+    # "cex.okx.passphrase": "Qwe123!@#",
 
-    "cex.binance.apikey": "3JIn0k7ZcTdR6bvPmWzf4Ha294rJqWvN2h69wyRc7ETbVKIiot8GOqEC6vjJYOuC",
-    "cex.binance.secretkey": "FkeW6gIYUAjrIhFRT7RFsT5950WsudstML8aoOFQqwLLoy3ukCIM9LRrXsRwk9WO",
+    # "cex.okx.apikey": "19e04efb-e8ee-4ceb-8706-e45815b605f7",
+    # "cex.okx.secretkey": "E826805718DA2A9DA8CD1C8882E92B5F",
+    # "cex.okx.passphrase": "Qwe123!@#",
+
+    # mail.com
+    "cex.okx.apikey": "8731b892-efa3-42f8-993d-4213c2d2e201",
+    "cex.okx.secretkey": "23558898E2AC618C0D61CB57EB988CB0",
+    "cex.okx.passphrase": "Qwe123!@#",
+     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # 配置okx用的代理，若网络网络无需代理，设置为None
+    "cex.okx.proxy": "http://127.0.0.1:7897",
+    #"cex.okx.proxy": None,
+
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # 为避免真实账户信息泄露，这里填写的是模拟账户的apikey和secretkey
+    # 如果需要使用实盘账户，请在os.getenv('cex_binance')中填写实盘账户的apikey和secretkey
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    "cex.binance.apikey": "Yef2imrldezU8R6hdgvBFPgMMFnsxG06TvPoQUpwP5UI4jw9XhM4MudQbCFgXVis",
+    "cex.binance.secretkey": "66Rc9gtt1OnudixpPKvIuqNL56YSymtfz8WQ6Q9rfw58R2TxAUY3RH4ohjaJkeYu",
 
     # ------------------------------------------------------
     # 设置逃顶模型各指标的参数

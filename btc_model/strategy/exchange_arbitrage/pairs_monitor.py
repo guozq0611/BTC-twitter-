@@ -29,6 +29,8 @@ class PairsMonitor:
         self.monitor_tasks = []
         self.running = False
 
+        self.on_arbitrage_opportunity_event_list = []
+
     def _build_symbol_map(self, pairs):
         """构建symbol到配对关系的快速映射"""
         symbol_map = defaultdict(dict)
@@ -73,7 +75,11 @@ class PairsMonitor:
                 } 
 
             price_field = f'price_{index}'
-            self.pair_data[pair_key][price_field] = ticker['last']
+            self.pair_data[pair_key][price_field] = {
+                'bid': ticker['bid'],
+                'ask': ticker['ask'],
+                'last': ticker['last']
+            }
  
             # 立即计算价差
             await self.calculate_spread(pair_key)
@@ -83,21 +89,36 @@ class PairsMonitor:
         data = self.pair_data[pair_key]
         try:
             if data['price_a'] and data['price_b']:
-                min_price = min(data['price_a'], data['price_b'])
-                spread = abs(data['price_a'] - data['price_b']) / min_price
-                data['spread'] = spread
+                # 作为a的买方，监控 price_a['ask'] / price_b['bid'] - 1 的价差
+                spread_buy_a = (data['price_b']['bid'] / data['price_a']['ask']) - 1
+                # 作为b的买方，监控 price_b['ask'] / price_a['bid'] - 1 的价差
+                spread_buy_b = (data['price_a']['bid'] / data['price_b']['ask']) - 1
 
+                # 取两个价差中的较大值作为最终价差
+                spread = max(spread_buy_a, spread_buy_b)
+                data['spread'] = spread
+                data['comment'] = ''
+               
                 # 触发报警的价差阈值
-                if spread > 0.01:  
+                if spread > 0.003:  # 假设阈值为1%
+                    if spread_buy_a > spread_buy_b:
+                        data['comment'] = f'【{self.exchange_a.id}】 买入 {data["price_a"]["ask"]},【{self.exchange_b.id}】 卖出 {data["price_b"]["bid"]}'
+    
+                    else:
+                        data['comment'] = f'【{self.exchange_b.id}】 买入 {data["price_b"]["ask"]},【{self.exchange_a.id}】 卖出 {data["price_a"]["bid"]}'
+
                     await self.trigger_arbitrage(pair_key)
-        except (TypeError, ZeroDivisionError) as e:
-            print(f"价差计算错误 {pair_key}: {str(e)}")
+        except (TypeError, ZeroDivisionError, KeyError) as e:
+            print(f"价差计算错误 {'-'.join(pair_key)  }: {str(e)}")
 
     async def trigger_arbitrage(self, pair_key):
         """触发套利逻辑"""
         data = self.pair_data[pair_key]
-        print(f"套利机会! {pair_key} 价差: {data['spread']:.2%}")
-        # 此处添加实际交易逻辑
+        # print(f"套利机会! {pair_key} 价差: {data['spread']:.2%}")
+
+        for event in self.on_arbitrage_opportunity_event_list:
+            event(pair_key, data)
+
 
     def start(self):
         """启动监控任务"""
@@ -113,6 +134,19 @@ class PairsMonitor:
         await asyncio.gather(*self.monitor_tasks, return_exceptions=True)
         await self.exchange_a.close()
         await self.exchange_b.close()
+
+    def on_arbitrage_opportunity(self, opportunity):
+        """处理套利机会"""
+        print(f"套利机会触发: {opportunity}")
+        # 在这里执行套利策略
+        self.execute_arbitrage(opportunity)
+
+    def add_arbitrage_opportunity_event(self, on_arbitrage_opportunity_event):
+        if callable(on_arbitrage_opportunity_event):
+            self.on_arbitrage_opportunity_event_list.append(on_arbitrage_opportunity_event)
+        else:
+            raise ValueError("传递的对象不是可调用的函数或方法")
+
 
 async def run_monitor(exchange_a, exchange_b, pairs):
     await exchange_a.load_markets()

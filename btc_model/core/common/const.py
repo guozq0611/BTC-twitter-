@@ -95,3 +95,66 @@ class EntityType(Enum):
     ORDER = 'ORDER'
     TRADE = 'TRADE'
     ACCOUNT = 'ACCOUNT'
+
+
+class OrderType(Enum):
+    LIMIT_ORDER = "LIMIT_ORDER"
+    MARKET_ORDER = "MARKET_ORDER"
+
+
+class Direction(Enum):
+    """
+    Direction of order/trade.
+    """
+    BUY = "BUY"
+    SELL = "SELL"
+
+    LONG = "LONG"
+    SHORT = "SHORT"
+
+    @property
+    def is_spot(self) -> bool:
+        """现货方向"""
+        return self in {Direction.BUY, Direction.SELL}
+    
+    @property
+    def is_futures(self) -> bool:
+        """衍生品方向"""
+        return self in {Direction.LONG, Direction.SHORT}
+    
+
+class PositionDirection(Enum):
+    """
+    Direction specifically for positions.
+    """
+    LONG = "LONG"   # 多
+    SHORT = "SHORT" # 空
+    NET = "NET"     # 净持仓
+
+
+class OrderStatus(Enum):
+    """
+    Order status.
+    """
+    SUBMITTING = "SUBMITTING"
+    NOTTRADED = "NOTTRADED"
+    PARTTRADED = "PARTTRADED"
+    ALLTRADED = "ALLTRADED"
+    CANCELLED = "CANCELLED"
+    REJECTED = "REJECTED"
+
+ACTIVE_ORDER_STATUSES = set([OrderStatus.SUBMITTING, 
+                             OrderStatus.NOTTRADED, 
+                             OrderStatus.PARTTRADED])
+
+class Offset(Enum):
+    """
+    Offset of order/trade.
+    """
+    NONE = "NONE"
+    OPEN = "OPEN"
+    CLOSE = "CLOSE"
+    CLOSETODAY = "CLOSETODAY"
+    CLOSEYESTERDAY = "CLOSEYESTERDAY"
+
+

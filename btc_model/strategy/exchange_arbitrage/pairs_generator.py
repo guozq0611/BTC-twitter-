@@ -115,6 +115,6 @@ if __name__ == "__main__":
     okx = ccxt.okx(params)
 
     pairs_generator = PairsGenerator(binance, okx)
-    abnormal_pairs, normal_pairs = pairs_generator.run()
+    abnormal_pairs, normal_pairs = pairs_generator.run(type_a='spot', subtype_a='spot', type_b='spot', subtype_b='spot')
     pd.DataFrame(normal_pairs).to_csv("normal_pairs.csv")
     pd.DataFrame(abnormal_pairs).to_csv("abnormal_pairs.csv")
