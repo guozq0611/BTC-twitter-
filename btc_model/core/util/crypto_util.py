@@ -147,13 +147,12 @@ class CryptoUtil:
         except ccxt.ExchangeError as e:
             raise Exception(f"查询提现状态失败: {str(e)}")
 
-    def get_trading_fees(self, exchange: ccxt.Exchange, symbols: List[str] = None) -> Dict:
+    def get_trading_fees(self, exchange: ccxt.Exchange) -> Dict:
         """
         获取交易对的交易费率
         考虑交易费率相对固定，用户可以自行设置费率，所以这里直接从设置中获取费率
         Args:
             exchange: 交易所实例
-            symbols: 交易对列表，例如 ['BTC/USDT']
             
         Returns:
             Dict: 费率信息
@@ -479,11 +478,7 @@ class CryptoUtil:
             
             for symbol, market in markets.items():
                 # 筛选永续合约
-                if (
-                    market.get('future') and  # 是期货合约
-                    not market.get('expiry') and  # 无到期日（永续）
-                    market.get('linear')  # 正向合约
-                ):
+                if market.get('swap') and market.get('linear'):
                     market_info = {
                         'symbol': symbol,
                         'base': market['base'],
@@ -497,7 +492,6 @@ class CryptoUtil:
                         'fees': {
                             'maker': market.get('maker'),
                             'taker': market.get('taker'),
-                            'funding': self.get_funding_rate(exchange, symbol)
                         },
                         'maintenance_margin': market.get('maintenance_margin_rate'),
                         'initial_margin': market.get('initial_margin_rate'),

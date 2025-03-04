@@ -5,6 +5,8 @@ import asyncio
 import ccxt.pro as ccxtpro
 from btc_model.core.util.log_util import Logger
 from btc_model.strategy.exchange_arbitrage.pairs_monitor import PairsMonitor
+from btc_model.core.common.object import PositionData
+from btc_model.core.util.crypto_util import get_position_data
 
 
 class ExchangeArbitrageStrategy:
@@ -31,6 +33,7 @@ class ExchangeArbitrageStrategy:
     #         logger.error(f"启动ExchangeArbitrageStrategy失败,错误信息:{e}", exc_info=True)
     #         return False
 
+
     async def run_monitor(self):
         await self.exchange_1.load_markets()
         await self.exchange_2.load_markets()
@@ -49,6 +52,62 @@ class ExchangeArbitrageStrategy:
             asyncio.run(self.run_monitor())
         except KeyboardInterrupt:
             print("程序已终止")
+
+
+    def load_positions(self):
+        """刷新两个交易所的持仓数据（现货和永续合约）"""
+        try:
+            # 刷新第一个交易所的持仓数据
+            # 获取现货持仓
+            spot_balance1 = self.exchange1.fetch_balance()
+            if spot_balance1:
+                for currency, balance in spot_balance1['total'].items():
+                    if balance > 0:
+                        self.position_holder1.add_position(
+                            f"{currency}/USDT", 
+                            balance,
+                            0  # 现货没有entry_price概念
+                        )
+
+            # 获取永续合约持仓
+            futures_positions1 = self.exchange1.fetch_positions()
+            if futures_positions1:
+                for position in futures_positions1:
+                    if float(position['contracts']) != 0:
+                        self.position_holder1.add_position(
+                            position['symbol'],
+                            float(position['contracts']),
+                            float(position['entryPrice'])
+                        )
+
+            # 刷新第二个交易所的持仓数据
+            # 获取现货持仓
+            spot_balance2 = self.exchange2.fetch_balance()
+            if spot_balance2:
+                for currency, balance in spot_balance2['total'].items():
+                    if balance > 0:
+                        self.position_holder2.add_position(
+                            f"{currency}/USDT", 
+                            balance,
+                            0  # 现货没有entry_price概念
+                        )
+
+            # 获取永续合约持仓
+            futures_positions2 = self.exchange2.fetch_positions()
+            if futures_positions2:
+                for position in futures_positions2:
+                    if float(position['contracts']) != 0:
+                        self.position_holder2.add_position(
+                            position['symbol'],
+                            float(position['contracts']),
+                            float(position['entryPrice'])
+                        )
+
+            self.logger.info("持仓数据刷新成功")
+
+        except Exception as e:
+            self.logger.error(f"刷新持仓数据失败: {str(e)}")
+            raise
 
     def send_order(self, order):
         pass

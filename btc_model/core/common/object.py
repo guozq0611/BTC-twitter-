@@ -112,3 +112,33 @@ class CancelRequest:
     orderid: str
     symbol: str
     exchange: Exchange
+
+
+
+@dataclass
+class PositionData:
+    """
+    Positon data is used for tracking each individual position holding.
+    """
+
+    symbol: str
+    exchange: Exchange
+    direction: Direction
+
+    volume: float = 0
+    frozen: float = 0
+
+
+
+@dataclass
+class AccountData:
+    """
+    Account data contains information about balance, frozen and
+    available.
+    """
+
+    account_id: str
+
+    balance: float = 0
+    frozen: float = 0
+    available: float = 0

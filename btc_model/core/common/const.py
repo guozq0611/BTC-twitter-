@@ -32,16 +32,27 @@ class InstrumentType(Enum):
 
 class Product(Enum):
     # 股指期货
-
-    # 商品期货
+    IH = 'IH'   # 上证50
+    IF = 'IF'   # 沪深300
+    IC = 'IC'   # 中证500
 
     # 加密货币
-    SPOT = 'SPOT'  # Spot
-    MARGIN = 'MARGIN'  # Margin
-    SWAP = 'SWAP'  # Perpetual Futures
-    FUTURES = 'FUTURES'  # Expiry Futures
-    OPTION = 'OPTION'  # Option
+    SPOT = 'SPOT'      # 现货
+    MARGIN = 'MARGIN'  # 杠杆
+    SWAP = 'SWAP'      # 永续合约
+    FUTURE = 'FUTURE'  # 期货
+    OPTION = 'OPTION'  # 期权
 
+    @property
+    def is_index_future(self) -> bool:
+        """股指期货"""
+        return self in {Product.IH, Product.IF, Product.IC}
+    
+    @property
+    def is_crypto(self) -> bool:
+        """加密货币"""
+        return self in {Product.SPOT, Product.MARGIN, Product.SWAP, Product.FUTURE, Product.OPTION}
+    
 
 class Exchange(Enum):
     """
