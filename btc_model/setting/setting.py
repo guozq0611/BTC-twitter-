@@ -2,6 +2,7 @@ import os
 from logging import CRITICAL
 from typing import Dict, Any
 
+from btc_model.core.common.const import PROJECT_NAME
 from btc_model.core.util.file_util import FileUtil
 
 SETTINGS: Dict[str, Any] = {
@@ -29,33 +30,50 @@ SETTINGS: Dict[str, Any] = {
     "email.sender": "",
     "email.receiver": "",
 
+    "trade.live_mode": True,
+
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # 为避免真实账户信息泄露，这里填写的是模拟账户的apikey和secretkey
-    # 如果需要使用实盘账户，请在os.getenv('cex_okx')中填写实盘账户的apikey和secretkey
+    # 如果需要使用实盘账户，请在.ThorpAI/setting/setting.local.json中填写实盘账户的apikey和secretkey
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # "cex.okx.apikey": "dede12e9-ec61-4212-944e-9ac5138f743b",
-    # "cex.okx.secretkey": "E70C2C82FDC68D98DC7252B83745B38F",
-    # "cex.okx.passphrase": "Qwe123!@#",
-
-    # "cex.okx.apikey": "19e04efb-e8ee-4ceb-8706-e45815b605f7",
-    # "cex.okx.secretkey": "E826805718DA2A9DA8CD1C8882E92B5F",
-    # "cex.okx.passphrase": "Qwe123!@#",
-
-    # mail.com
-    "cex.okx.apikey": "8731b892-efa3-42f8-993d-4213c2d2e201",
-    "cex.okx.secretkey": "23558898E2AC618C0D61CB57EB988CB0",
+    "cex.okx.apikey": "dede12e9-ec61-4212-944e-9ac5138f743b",
+    "cex.okx.secretkey": "E70C2C82FDC68D98DC7252B83745B38F",
     "cex.okx.passphrase": "Qwe123!@#",
-     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # 配置okx用的代理，若网络网络无需代理，设置为None
-    "cex.okx.proxy": "http://127.0.0.1:7897",
-    #"cex.okx.proxy": None,
+   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    # 配置okx用的代理，若网络网络无需代理，设置为False
+    "cex.okx.proxy": True,
+    "cex.okx.fees": {
+                'spot': {
+                    'maker': 0.0008,
+                    'taker': 0.001
+                },
+                'swap': {
+                    'maker': 0.0002,
+                    'taker': 0.0005
+                }
+            },
 
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # 为避免真实账户信息泄露，这里填写的是模拟账户的apikey和secretkey
-    # 如果需要使用实盘账户，请在os.getenv('cex_binance')中填写实盘账户的apikey和secretkey
+    # 如果需要使用实盘账户，请在.ThorpAI/setting/setting.local.json中填写实盘账户的apikey和secretkey
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     "cex.binance.apikey": "Yef2imrldezU8R6hdgvBFPgMMFnsxG06TvPoQUpwP5UI4jw9XhM4MudQbCFgXVis",
     "cex.binance.secretkey": "66Rc9gtt1OnudixpPKvIuqNL56YSymtfz8WQ6Q9rfw58R2TxAUY3RH4ohjaJkeYu",
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    
+    # 配置binance用的代理，若网络网络无需代理，设置为False
+    "cex.binance.proxy": True,
+    "cex.binance.fees": {
+                'spot': {
+                    'maker': 0.001,
+                    'taker': 0.001
+                },
+                'swap': {
+                    'maker': 0.0002,
+                    'taker': 0.0004
+                }
+            },
 
     # ------------------------------------------------------
     # 设置逃顶模型各指标的参数
@@ -103,9 +121,21 @@ SETTINGS: Dict[str, Any] = {
 }
 
 
+def update_settings(d1: Dict, d2: Dict) -> Dict:
+    """递归合并两个字典"""
+    result = d1.copy()
+    for k, v in d2.items():
+        if k in result and isinstance(result[k], dict) and isinstance(v, dict):
+            result[k] = update_settings(result[k], v)
+        else:
+            result[k] = v
+    return result
+
+
 # Load global setting from json file.
-# SETTING_FILENAME: str = "blockchain_setting.json"
-# SETTINGS.update(FileUtil.load_json(SETTING_FILENAME))
+setting_filename: str = "setting.local.json"
+local_settings_file_path = os.path.join(FileUtil.get_project_dir(project_name=PROJECT_NAME, sub_dir='setting'), setting_filename)
+SETTINGS = update_settings(SETTINGS, FileUtil.load_json(local_settings_file_path))
 
 
 def get_settings(prefix: str = "") -> Dict[str, Any]:
@@ -134,3 +164,8 @@ def get_proxy_settings():
         "https": "http://127.0.0.1:7890"
     })
 
+if __name__ == "__main__":
+    setting = get_settings('cex.okx')
+    print(setting)
+
+    
