@@ -23,6 +23,7 @@ class ExchangeArbitrageStrategy:
         self.queue = queue.Queue()
         # 套利机会事件列表
         self.on_arbitrage_event_list = []
+        self.websocket_manager = None
 
     # def start(self):
     #     try:
@@ -120,6 +121,27 @@ class ExchangeArbitrageStrategy:
         Logger.info(f"套利信号触发: {'-'.join(pair_key) :<10} 价差: {data['spread']:>6.2%}, {data['comment']}"
 )
        
+
+    async def start(self):
+        # 启动 WebSocket 服务器
+        import uvicorn
+        uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    def get_exchange_a_price(self):
+        # 实现获取交易所A价格的方法
+        pass
+
+    def get_exchange_b_price(self):
+        # 实现获取交易所B价格的方法
+        pass
+
+    def get_price_diff(self):
+        # 实现获取价差的方法
+        pass
+
+    def get_diff_percentage(self):
+        # 实现获取价差百分比的方法
+        pass
 
 
 if __name__ == "__main__":
